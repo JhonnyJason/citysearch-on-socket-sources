@@ -2,6 +2,7 @@
 scimodule = {name: "scimodule"}
 
 #region node_modules
+require('systemd')
 express = require('express')
 bodyParser = require('body-parser')
 #endregion
@@ -97,6 +98,16 @@ onStringSearch = (req, res) ->
     finally res.send results
     return
 
+listenForRequests = ->
+    log "listenForRequests"
+    if process.env.SOCKETMODE
+        app.listen "systemd"
+        log "listening on systemd"
+    else
+        port = process.env.PORT || cfg.defaultPort
+        app.listen port
+        log "listening on port: " + port
+
 #endregion
 
 
@@ -105,10 +116,8 @@ scimodule.prepareAndExpose = ->
     log "scimodule.prepareAndExpose"
     setAllowedOrigins()
     attachSCIFunctions()
-    port = process.env.PORT || cfg.defaultPort
-    app.listen port
-    log "listening on port: " + port
-
+    listenForRequests()
+    
 #endregion exposed functions
 
 export default scimodule
